@@ -13,6 +13,5 @@ public class BaseEnemy
     public float currDEF;
 
     public float basekbm;
-
     public float currkbm;
 }

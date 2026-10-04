@@ -6,6 +6,7 @@ public class HeroStateMachine : MonoBehaviour
 {
     public BaseHero hero;
 
+    private BattleStateMachine BSM;
     public enum TurnState
     {
         PROSSESING,
@@ -24,6 +25,7 @@ public class HeroStateMachine : MonoBehaviour
 
     void Start()
     {
+        BSM = GameObject.Find("BattleManager").GetComponent<BattleStateMachine>();
         currentState = TurnState.PROSSESING;
     }
 
@@ -36,11 +38,14 @@ public class HeroStateMachine : MonoBehaviour
                 UpgradeProgressBar();
                 break;
             case (TurnState.ADDTOLIST):
+                BSM.HerosToManage.Add (this.gameObject);
+                currentState = TurnState.WAITING;
                 break;
             case (TurnState.WAITING):
+                //Idle
                 break;
-            case (TurnState.SELECCTING):
-                break;
+            //case (TurnState.SELECCTING):
+            //  break;
             case (TurnState.ACTION):
                 break;
             case (TurnState.DEAD):
