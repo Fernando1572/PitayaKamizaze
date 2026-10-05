@@ -36,6 +36,9 @@ public class BattleStateMachine : MonoBehaviour
 
     public GameObject enemyButton;
     public Transform Spacer;
+    
+    public GameObject AttackPanel;
+    public GameObject EnemySelectPanel;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -44,6 +47,10 @@ public class BattleStateMachine : MonoBehaviour
         BattleStates = PerformAction.WAIT;
         EnemiesInBattle.AddRange(GameObject.FindGameObjectsWithTag("Enemy"));
         HerosInBattle.AddRange(GameObject.FindGameObjectsWithTag("Hero"));
+        HeroInput = HeroGUI.ACTIVATE;
+
+        AttackPanel.SetActive(false);
+        EnemySelectPanel.SetActive(false);
 
         EnemyButtons();
     }
@@ -70,7 +77,7 @@ public class BattleStateMachine : MonoBehaviour
 
                 if (PerformList[0].Type == "Hero")
                 {
-
+                    Debug.Log("Hero is here to perform");
                 }
 
                 BattleStates = PerformAction.PERFORMACTION;
@@ -78,6 +85,29 @@ public class BattleStateMachine : MonoBehaviour
             case (PerformAction.PERFORMACTION):
 
                 break;
+        }
+
+        switch (HeroInput)
+        {
+            case (HeroGUI.ACTIVATE):
+                if(HerosToManage.Count > 0)
+                {
+                    HerosToManage[0].transform.Find("Selector").gameObject.SetActive(true);
+                    HeroChoice = new HandleTurn();
+                    
+                    AttackPanel.SetActive(true);
+                    HeroInput = HeroGUI.WAITING;
+                    
+                }
+            break;
+
+            case (HeroGUI.WAITING):
+                //idle
+            break;
+
+            case (HeroGUI.DONE):
+                HeroInputDone();
+            break;
         }
     }
 
@@ -110,5 +140,30 @@ public class BattleStateMachine : MonoBehaviour
             button.EnemyPrefab = enemy;
             newButton.transform.SetParent(Spacer, false);
         }
+    }
+
+    public void Input1 () //attack button
+    {
+        HeroChoice.Attacker = HerosToManage[0].name;
+        HeroChoice.AttackersGameObject = HerosToManage[0];
+        HeroChoice.Type = "Hero";
+
+        AttackPanel.SetActive(false);
+        EnemySelectPanel.SetActive(true);
+    }
+
+    public void Input2 (GameObject ChoosenEnemy) //enemy selection
+    {
+        HeroChoice.AttackersTarget = ChoosenEnemy;
+        HeroInput = HeroGUI.DONE;
+    }
+
+    public void HeroInputDone()
+    {
+        PerformList.Add(HeroChoice);
+        EnemySelectPanel.SetActive(false);
+        HerosToManage[0].transform.Find("Selector").gameObject.SetActive(false);
+        HerosToManage.RemoveAt(0);
+        HeroInput = HeroGUI.ACTIVATE;
     }
 }
