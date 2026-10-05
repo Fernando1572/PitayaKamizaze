@@ -77,13 +77,16 @@ public class BattleStateMachine : MonoBehaviour
 
                 if (PerformList[0].Type == "Hero")
                 {
-                    Debug.Log("Hero is here to perform");
+                    //Debug.Log("Hero is here to perform");
+                    HeroStateMachine HSM = performer.GetComponent<HeroStateMachine>();
+                    HSM.EnemyToAttack = PerformList[0].AttackersTarget;
+                    HSM.currentState = HeroStateMachine.TurnState.ACTION;
                 }
 
                 BattleStates = PerformAction.PERFORMACTION;
                 break;
             case (PerformAction.PERFORMACTION):
-
+                //idle
                 break;
         }
 
@@ -125,7 +128,7 @@ public class BattleStateMachine : MonoBehaviour
 
             EnemyStateMachine cur_enemy = enemy.GetComponent<EnemyStateMachine>();
 
-            // Obtiene el componente TextMeshProUGUI en lugar de Text
+            // Obtiene el componente TextMeshProUGUI en lugar de Text (esto lo corrigio gemini por que el tutorial estaba desactualizado)
             TextMeshProUGUI buttonText = newButton.GetComponentInChildren<TextMeshProUGUI>();
 
             if (buttonText != null && cur_enemy != null && cur_enemy.enemy != null)

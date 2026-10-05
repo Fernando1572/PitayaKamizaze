@@ -25,8 +25,15 @@ public class HeroStateMachine : MonoBehaviour
 
     public GameObject Selector;
 
+    //IEnumerator
+    public GameObject EnemyToAttack;
+    private bool actionStarted = false;
+    private Vector3 startPosition;
+    private float animSpeed = 10f;
+
     void Start()
     {
+        startPosition = transform.position;
         cur_cooldown = Random.Range(0, 2.5f);
         Selector.SetActive(false);
         BSM = GameObject.Find("BattleManager").GetComponent<BattleStateMachine>();
@@ -51,6 +58,7 @@ public class HeroStateMachine : MonoBehaviour
             //case (TurnState.SELECCTING):
             //  break;
             case (TurnState.ACTION):
+                StartCoroutine(TimeForAction());
                 break;
             case (TurnState.DEAD):
                 break;
@@ -67,5 +75,51 @@ public class HeroStateMachine : MonoBehaviour
         {
             currentState = TurnState.ADDTOLIST;
         }
+    }
+
+    private IEnumerator TimeForAction()
+    {
+        if (actionStarted)
+        {
+            yield break;
+        }
+
+        actionStarted = true;
+
+        //animate the enemy near the hero to attack
+        Vector3 heroPosition = new Vector3(EnemyToAttack.transform.position.x - 1.5f, EnemyToAttack.transform.position.y - 0.5f, EnemyToAttack.transform.position.z);
+        while (MoveTowardsEnemy(heroPosition))
+        {
+            yield return null;
+        }
+        //wait abit
+        yield return new WaitForSeconds(0.5f);
+        //do damage
+
+        //animate back to start position
+        Vector3 firstPosition = startPosition;
+        while (MoveTowardsStart(firstPosition))
+        {
+            yield return null;
+        }
+        //remove this performer from the list in BSM
+        BSM.PerformList.RemoveAt(0);
+        //reset BSM -> WAIT
+        BSM.BattleStates = BattleStateMachine.PerformAction.WAIT;
+        //end coroutine
+        actionStarted = false;
+        //reset this enemy state
+        cur_cooldown = 0f;
+        currentState = TurnState.PROSSESING;
+    }
+
+    private bool MoveTowardsEnemy(Vector3 target)
+    {
+        return target != (transform.position = Vector3.MoveTowards(transform.position, target, animSpeed * Time.deltaTime));
+    }
+
+    private bool MoveTowardsStart(Vector3 target)
+    {
+        return target != (transform.position = Vector3.MoveTowards(transform.position, target, animSpeed * Time.deltaTime));
     }
 }
